@@ -1,14 +1,12 @@
-package com.NewsApp.NewsApp.Service.News;
+package com.NewsApp.NewsApp.Service.Ads;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.LocalDate;
 import java.util.UUID;
 
-import org.apache.el.stream.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +16,13 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.NewsApp.NewsApp.Controller.User.UserActionController;
+import com.NewsApp.NewsApp.DAO.Ads.AdsRepo;
 import com.NewsApp.NewsApp.DAO.News.UploadNewsRepo;
+import com.NewsApp.NewsApp.Entities.Ads.Ads;
+import com.NewsApp.NewsApp.Entities.Ads.AdsEnglishDetail;
+import com.NewsApp.NewsApp.Entities.Ads.AdsEnglishMapper;
+import com.NewsApp.NewsApp.Entities.Ads.AdsHindiDetail;
+import com.NewsApp.NewsApp.Entities.Ads.AdsHindiMapper;
 import com.NewsApp.NewsApp.Entities.Enum.Category;
 import com.NewsApp.NewsApp.Entities.News.NewsArticlesEng;
 import com.NewsApp.NewsApp.Entities.News.NewsArticlesHindi;
@@ -26,52 +30,55 @@ import com.NewsApp.NewsApp.Entities.News.NewsDeatil;
 import com.NewsApp.NewsApp.Entities.News.NewsMapperEnglish;
 import com.NewsApp.NewsApp.Entities.News.NewsMapperHindi;
 
-import jakarta.validation.constraints.AssertFalse.List;
-
 @Service
-public class NewsUpload {
-    
-	
+public class AdsService {
+
 	
 	@Autowired
-	private UploadNewsRepo uploadNews;
+	private AdsRepo adsRepo;
 	
-	private String FOLDER_PATH="C:\\Users\\ashwa\\OneDrive\\Documents\\MyFile\\";
+	private String FOLDER_PATH="C:\\Users\\ashwa\\OneDrive\\Documents\\AdsFile\\";
 	
 	private static final Logger logger=LoggerFactory.getLogger(UserActionController.class);
 
 	@Transactional
-    public String uploadImageToFileSystem(MultipartFile file,NewsMapperHindi hindi,NewsMapperEnglish Englis) throws IOException {
+    public String uploadImageToFileSystem(MultipartFile file,AdsHindiMapper hindi,AdsEnglishMapper Englis) throws IOException {
        // String filePath=FOLDER_PATH+file.getOriginalFilename();
 
-        logger.info("now uploading of news start.........");
+        logger.info("now uploading of Ads start.........");
         String imagePath = saveImage(file);
-        logger.info("Image Url.........");
+        logger.info("Image Url.........{}",imagePath);
         
-        NewsDeatil newsDeatil=uploadNews.save(NewsDeatil.builder()
+        Ads ads=adsRepo.save(Ads.builder()
         		                   .ImageUrl(imagePath)
-        		          
+        		                   
         		                   .type(file.getContentType())
-        		                   .category(Category.Business)
-        		                   .newsArticlesEng(NewsArticlesEng.builder().Headline(Englis.getHeadline())
-        		                		            .Contain(Englis.getContain()).build()
-        		                		   )
-        		                   .newsArticlesHindi(NewsArticlesHindi.builder().Headline(hindi.getHeadline())
-        		                		                .Contain(hindi.getContain()).build()
-        		                		   ).build()
-        		);
+        		                   .AdsHindiDetail(AdsHindiDetail.builder()
+        		                		   .AdsHindiDetail_ID(0)
+        		                		   .Headline(hindi.getHeadline())
+        		                		   .Contain(hindi.getContain())
+        		                		   .build())
+        		                   .AdsEnglishDetail(AdsEnglishDetail.builder()
+        		                		   .AdsEnglishDetail_ID(0)
+        		                		   .Headline(Englis.getHeadline())
+        		                		   .Contain(Englis.getContain()).build()) 
+        		                   .build());
         
+        		          
+        	
+       
         
 
         //file.transferTo(new File(filePath));
 
         
-        logger.info("now uploaded Done.........");
+        logger.info("Ads uploaded Done.........");
         
-        if (newsDeatil != null) {
+        if (ads != null) {
             return "file uploaded successfully : XXXXXXXXXXXXXXXXXX";
         }
         return null;
+        
     }
 	
     
@@ -82,7 +89,7 @@ public class NewsUpload {
 //        
 //    	
 //        
-//        logger.error("  fileName {}",uploadNews.findByName(fileName));
+//        logger.error("  fileName {}",adsRepo.findByAdsName(fileName));
 //       // String filePath=fileData.get().getFilePath();
 //        //byte[] images = Files.readAllBytes(new File(filePath).toPath());
 //       // return images;
@@ -105,11 +112,10 @@ public class NewsUpload {
           
           // Generate download URL
           String downloadUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
-                  .path("/download/")
+                  .path("/ads/download/")
                   .path(fileName)
                   .toUriString();
           
           return downloadUrl; // Save this URL in the database
       }
-      
 }
